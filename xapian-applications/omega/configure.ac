@@ -115,6 +115,10 @@ AC_CHECK_DECLS([_addcarry_u32(unsigned char, unsigned, unsigned, unsigned*),
 		_subborrow_u64(unsigned char, unsigned __int64, unsigned __int64, unsigned __int64*)],
 	       [], [], [#include <intrin.h>])
 
+dnl See if we have closefrom(), or some functions that are useful to implement
+dnl closefrom() on platforms which don't provide it.
+AC_CHECK_FUNCS([closefrom getdirentries getrlimit])
+
 dnl Check for time functions.
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([clock_gettime sleep nanosleep gettimeofday ftime])
