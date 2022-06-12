@@ -56,6 +56,8 @@
 #include "str.h"
 #include "stringutils.h"
 #include "urlencode.h"
+#include "runfilter.h"
+#include "utils.h"
 
 #include "gnu_getopt.h"
 
@@ -87,12 +89,33 @@ p_notalnum(unsigned int c)
     return !C_isalnum(c);
 }
 
+static string
+ipfs_hash(const string &file)
+{
+	string cid;
+	mode_t mode = O_BINARY | O_RDONLY;
+	int fd = open(file.c_str(), mode);
+	if (fd < 0) return "";
+	try {
+		run_filter(fd, "ipfs add -n -q -", false, &cid);
+	} catch (const ReadError&) {
+		cid = "";
+    }
+	close(fd);
+    trim(cid);
+	return cid;
+}
+
 static void
 index_file(const string &file, const string &url, DirectoryIterator & d,
 	   map<string, string>& mime_map)
 {
     string urlterm("U");
-    urlterm += url;
+    string cid = ipfs_hash(file);
+    if (cid == "")
+        urlterm += url;
+	else
+        urlterm += cid;
 
     if (urlterm.length() > MAX_SAFE_TERM_LENGTH)
 	urlterm = hash_long_term(urlterm, MAX_SAFE_TERM_LENGTH);
@@ -165,7 +188,7 @@ index_file(const string &file, const string &url, DirectoryIterator & d,
     path_term += url_start_path;
     path_term.append(file, root.size(), string::npos);
 
-    index_mimetype(file, urlterm, url, ext, mimetype, d, path_term, string());
+    index_mimetype(file, urlterm, url, ext, mimetype, d, path_term, string("cid=")+cid);
 }
 
 static void

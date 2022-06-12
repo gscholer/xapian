@@ -5,5 +5,5 @@
 /configure
 /Makefile
 /config.cache
-/BUILD
+/BUILD*
 /INST
