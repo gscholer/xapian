@@ -29,6 +29,7 @@
 #include "gnu_getopt.h"
 #include "hashterm.h"
 #include "common/stringutils.h"
+#include "urldecode.h"
 
 using namespace std;
 
@@ -84,10 +85,10 @@ try {
 	 t != db.allterms_end("U");
 	 ++t) {
 	const string & term = *t;
-	string url;
-	if (term.size() < MAX_SAFE_TERM_LENGTH) {
-	    url.assign(term, 1, string::npos);
-	} else {
+	string urlterm, url;
+	// if (term.size() < MAX_SAFE_TERM_LENGTH) {
+	    urlterm.assign(term, 1, string::npos);
+	// } else {
 	    Xapian::PostingIterator p = db.postlist_begin(term);
 	    if (p == db.postlist_end(term)) {
 		cerr << "Unique term '" << term << "' has no postings!" << endl;
@@ -113,8 +114,9 @@ try {
 		start += CONST_STRLEN("\nurl=");
 	    }
 	    url.assign(data, start, data.find('\n', start) - start);
-	}
-	cout << url << endl;
+		url_prettify(url);
+	// }
+	cout << urlterm << "\t" << url << endl;
     }
 } catch (const Xapian::Error &error) {
     cerr << argv[0] << ": " << error.get_description() << endl;
